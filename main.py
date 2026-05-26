@@ -1,20 +1,3 @@
-# ════════════════════════════════════════════════════════════════════════════
-#  Dann-Alpes — ISIS1511 — Entrega 3
-#  Middleware FastAPI: puente HTTPS entre APEX y MongoDB
-#
-#  Despliegue en Render:
-#    1) Subir este archivo + requirements.txt al repo de GitHub
-#    2) En Render: New > Web Service > conectar repo
-#    3) Build command:  pip install -r requirements.txt
-#    4) Start command:  uvicorn main:app --host 0.0.0.0 --port $PORT
-#    5) Variables de entorno: MONGO_URI = mongodb://usuario:pass@157.253.236.88:8087/
-#
-#  requirements.txt necesario:
-#    fastapi
-#    uvicorn
-#    pymongo
-# ════════════════════════════════════════════════════════════════════════════
-
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from pymongo import MongoClient, ASCENDING, DESCENDING
@@ -55,10 +38,6 @@ def validar_oid(resena_id: str) -> ObjectId:
         raise HTTPException(status_code=400, detail="ID de reseña inválido.")
     return ObjectId(resena_id)
 
-
-# ════════════════════════════════════════════════════════════════════════════
-#  RAÍZ — health check
-# ════════════════════════════════════════════════════════════════════════════
 
 @app.get("/")
 def inicio():

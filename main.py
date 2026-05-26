@@ -64,10 +64,12 @@ def validar_oid(resena_id: str) -> ObjectId:
 def inicio():
     return {"estado": "API Dann-Alpes Reseñas funcionando correctamente"}
 
+# OBTENER TODAS LAS RESEÑAS
+@app.get("/resenas")
+def get_todas_resenas():
+    return list(resenas.find({}, {"_id": 0}))
 
-# ════════════════════════════════════════════════════════════════════════════
 #  RF1 — CREAR RESEÑA
-# ════════════════════════════════════════════════════════════════════════════
 
 @app.post("/resenas")
 def crear_resena(data: dict):
@@ -110,9 +112,7 @@ def crear_resena(data: dict):
         raise HTTPException(400, f"Validación de esquema fallida: {e.details.get('errmsg', str(e))}")
 
 
-# ════════════════════════════════════════════════════════════════════════════
 #  RF2 — EDITAR RESEÑA (cliente)
-# ════════════════════════════════════════════════════════════════════════════
 
 @app.put("/resenas/{resena_id}")
 def editar_resena(resena_id: str, data: dict):
@@ -146,10 +146,7 @@ def editar_resena(resena_id: str, data: dict):
 
     return {"mensaje": "Reseña actualizada"}
 
-
-# ════════════════════════════════════════════════════════════════════════════
 #  RF3 — ELIMINAR RESEÑA (cliente, soft delete)
-# ════════════════════════════════════════════════════════════════════════════
 
 @app.delete("/resenas/{resena_id}")
 def eliminar_resena_cliente(resena_id: str):
@@ -171,9 +168,7 @@ def eliminar_resena_cliente(resena_id: str):
     return {"mensaje": "Reseña eliminada"}
 
 
-# ════════════════════════════════════════════════════════════════════════════
 #  RF4 — CONSULTAR RESEÑAS DE UN HOTEL (paginado, público)
-# ════════════════════════════════════════════════════════════════════════════
 
 @app.get("/hoteles/{id_hotel}/resenas")
 def resenas_hotel(
@@ -185,7 +180,6 @@ def resenas_hotel(
     """
     RF4: Consultar reseñas publicadas de un hotel, paginadas.
     La reseña destacada (si existe) se devuelve aparte, fuera de la paginación.
-    Es la operación más crítica: ~10 000 llamadas/día.
     """
     # 1. Reseña destacada (RF9). Siempre va primero en la UI.
     destacada = resenas.find_one({
@@ -217,10 +211,7 @@ def resenas_hotel(
         "total":     total
     }
 
-
-# ════════════════════════════════════════════════════════════════════════════
 #  RF5 — MARCAR RESEÑA COMO ÚTIL
-# ════════════════════════════════════════════════════════════════════════════
 
 @app.post("/resenas/{resena_id}/votos")
 def votar_util(resena_id: str, data: dict):
@@ -261,9 +252,7 @@ def votar_util(resena_id: str, data: dict):
     return {"mensaje": "Voto registrado"}
 
 
-# ════════════════════════════════════════════════════════════════════════════
 #  RF6 — HISTORIAL DE RESEÑAS PROPIAS
-# ════════════════════════════════════════════════════════════════════════════
 
 @app.get("/clientes/{id_cliente}/resenas")
 def resenas_cliente(
@@ -290,10 +279,7 @@ def resenas_cliente(
 
     return salida
 
-
-# ════════════════════════════════════════════════════════════════════════════
 #  RF7 — RESPONDER RESEÑA (administrador)
-# ════════════════════════════════════════════════════════════════════════════
 
 @app.put("/resenas/{resena_id}/respuesta")
 def responder_resena(resena_id: str, data: dict):
@@ -325,9 +311,7 @@ def responder_resena(resena_id: str, data: dict):
     return {"mensaje": "Respuesta registrada"}
 
 
-# ════════════════════════════════════════════════════════════════════════════
 #  RF8 — ELIMINAR RESEÑA (administrador, moderación)
-# ════════════════════════════════════════════════════════════════════════════
 
 @app.delete("/admin/resenas/{resena_id}")
 def eliminar_resena_admin(resena_id: str):
@@ -348,9 +332,7 @@ def eliminar_resena_admin(resena_id: str):
     return {"mensaje": "Reseña eliminada por moderación"}
 
 
-# ════════════════════════════════════════════════════════════════════════════
 #  RF9 — DESTACAR RESEÑA
-# ════════════════════════════════════════════════════════════════════════════
 
 @app.put("/resenas/{resena_id}/destacar")
 def destacar_resena(resena_id: str):
@@ -380,10 +362,8 @@ def destacar_resena(resena_id: str):
     return {"mensaje": "Reseña destacada"}
 
 
-# ════════════════════════════════════════════════════════════════════════════
 #  AUXILIAR — obtener una reseña por ID
 #  (útil para flujos de edición en APEX)
-# ════════════════════════════════════════════════════════════════════════════
 
 @app.get("/resenas/{resena_id}")
 def obtener_resena(resena_id: str):
@@ -393,10 +373,7 @@ def obtener_resena(resena_id: str):
         raise HTTPException(404, "Reseña no encontrada.")
     return serializar(doc)
 
-
-# ════════════════════════════════════════════════════════════════════════════
 #  RFC1 — TOP 10 HOTELES POR CALIFICACIÓN PROMEDIO
-# ════════════════════════════════════════════════════════════════════════════
 
 @app.get("/analytics/top-hoteles")
 def top_hoteles(
@@ -433,10 +410,7 @@ def top_hoteles(
 
     return list(resenas.aggregate(pipeline))
 
-
-# ════════════════════════════════════════════════════════════════════════════
 #  RFC2 — EVOLUCIÓN MENSUAL DE LA REPUTACIÓN DE UN HOTEL
-# ════════════════════════════════════════════════════════════════════════════
 
 @app.get("/hoteles/{id_hotel}/reputacion-mensual")
 def reputacion_mensual(id_hotel: int, ano: int = Query(..., ge=2020, le=2030)):
@@ -470,9 +444,7 @@ def reputacion_mensual(id_hotel: int, ano: int = Query(..., ge=2020, le=2030)):
     return list(resenas.aggregate(pipeline))
 
 
-# ════════════════════════════════════════════════════════════════════════════
 #  RFC3 — PERFIL COMPARATIVO DE HOTELES DE UNA CIUDAD
-# ════════════════════════════════════════════════════════════════════════════
 
 @app.get("/analytics/comparativa-hoteles")
 def comparativa_hoteles(

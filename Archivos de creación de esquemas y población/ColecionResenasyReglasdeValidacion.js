@@ -1,30 +1,9 @@
-// ════════════════════════════════════════════════════════════════════════════
-//  Dann-Alpes — ISIS1511 — Entrega 3
-//  Punto 1d. Esquemas de validación (JSON Schema) para las colecciones
-//
-//  Ejecución en MongoDB Compass:
-//    1) Conectarse al servidor MongoDB
-//    2) Abrir la pestaña "MongoSH" (Ctrl/Cmd + `)
-//    3) Pegar este script  ─o─ ejecutar:   load("1d_validacion.js")
-//
-//  Este script es AUTÓNOMO: re-crea la colección "resenas" con su validador
-//  y todos los índices (incluye lo del 1c). Es idempotente.
-//
-//  Modelo de validación aplicado:
-//    • validationLevel : "strict"  → valida inserts y updates
-//    • validationAction: "error"   → rechaza documentos no conformes
-// ════════════════════════════════════════════════════════════════════════════
-
-
-use("dann_alpes");
-
-
-// ─── 1. Limpieza preventiva ────────────────────────────────────────────────
+// 1. Limpieza preventiva 
 
 db.resenas.drop();
 
 
-// ─── 2. Creación de la colección CON validador ─────────────────────────────
+// 2. Creación de la colección CON validador
 
 db.createCollection("resenas", {
 
@@ -43,13 +22,13 @@ db.createCollection("resenas", {
 
             properties: {
 
-                // ── Identificador interno de MongoDB ────────────────────────
+                // ── Identificador interno de MongoDB
                 _id: {
                     bsonType: "objectId",
                     description: "ObjectId generado automáticamente por MongoDB."
                 },
 
-                // ── Referencias a Oracle (diseño híbrido) ───────────────────
+                // ── Referencias a Oracle (diseño híbrido)
                 id_reserva: {
                     bsonType: ["int", "long"],
                     minimum: 1,
@@ -67,7 +46,7 @@ db.createCollection("resenas", {
                     description: "Referencia a Oracle Clientes.id_usuario. Entero positivo."
                 },
 
-                // ── Contenido de la reseña ──────────────────────────────────
+                // ── Contenido de la reseña
                 calificacion: {
                     bsonType: ["int", "long"],
                     minimum: 1,
@@ -85,7 +64,7 @@ db.createCollection("resenas", {
                     description: "Timestamp de creación de la reseña (BSON Date)."
                 },
 
-                // ── Estado y moderación ─────────────────────────────────────
+                // ── Estado y moderación
                 estado: {
                     enum: ["publicada", "eliminada"],
                     description: "Estado de la reseña. Valores permitidos: " +
@@ -161,7 +140,7 @@ db.createCollection("resenas", {
 });
 
 
-// ─── 3. Re-creación de índices (idéntico a 1c) ─────────────────────────────
+// ─── 3. Re-creación de índices
 
 db.resenas.createIndex(
     { id_reserva: 1 },
@@ -189,7 +168,7 @@ db.resenas.createIndex(
 );
 
 
-// ─── 4. Verificación ───────────────────────────────────────────────────────
+// 4. Verificación 
 
 print("\n══════ COLECCIÓN resenas — INFORMACIÓN ══════");
 const info = db.getCollectionInfos({ name: "resenas" })[0];
